@@ -57,5 +57,10 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((e) => {
     console.log(e);
   });
+
+app.get('/', (req, res) => {
+console.log('API is working');
+res.send('Welcome to my API!');
+});
 // Export the Express app as a Firebase Function
 // exports.api = functions.https.onRequest(app);
