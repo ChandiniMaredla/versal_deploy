@@ -26,15 +26,34 @@ const layoutRoutes = require('./src/routes/layoutRoutes');
 
 const app = express();
 
-app.use(cors({
-  origin: '*',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// app.use(cors({
+//   origin: '*',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+//   credentials: true,
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
 
+// app.options('*', cors());
+
+const corsOptions = {
+  origin: 'https://full-real-estate.web.app', // Adjust this to match your frontend's origin
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
+
+// Preflight requests
 app.options('*', cors());
+
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  console.log(`Received request for: ${req.originalUrl}`);
+  next();
+});
 app.use('/', noAuthRouter);
 app.use('/users', verifyJwt, userRoutes);
 app.use('/wishlist',verifyJwt, wishlistRoutes);
@@ -47,7 +66,15 @@ app.use('/booking',verifyJwt,bookingRoutes);
 app.use('/location',locationRoutes);
 app.use('/layout',verifyJwt,layoutRoutes);
 app.use(errorHandler);
-mongoose.connect(process.env.MONGODB_URI)
+
+
+
+app.get('/', (req, res) => {
+  console.log('API is working');
+  res.send('Welcome to my API!');
+});
+
+mongoose.connect('mongodb+srv://ITCC:x3txwwBMqr1bQZnR@atlascluster.30o4fpw.mongodb.net/RealEstate?retryWrites=true&w=majority&appName=AtlasCluster')
   .then(() => {
     console.log('DB Connected');
     app.listen(3002, () => {
@@ -57,10 +84,5 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((e) => {
     console.log(e);
   });
-
-app.get('/', (req, res) => {
-console.log('API is working');
-res.send('Welcome to my API!');
-});
 // Export the Express app as a Firebase Function
 // exports.api = functions.https.onRequest(app);
